@@ -15,7 +15,7 @@ namespace Mist452SmithMayka
 
             var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connString));
+            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connString));
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
