@@ -1,0 +1,50 @@
+﻿@model IEnumerable<Mist452SmithMayka.Models.Listing>
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center mb-4">
+    <h1 class="display-4">Marketplace Home</h1>
+    <p>Browse listings or create your own item for sale.</p>
+</div>
+
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    <p>
+        <a asp-controller="Listings" asp-action="Create" class="btn btn-primary">Create Listing</a>
+    </p>
+}
+
+<h2>Current Listings</h2>
+
+@if (!Model.Any())
+{
+    <p>No listings have been created yet.</p>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Seller</th>
+                <th>Date Created</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Title</td>
+                <td>@item.Description</td>
+                <td>@item.Price.ToString("C")</td>
+                <td>@item.Seller?.UserName</td>
+                <td>@item.CreatedDate.ToShortDateString()</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
