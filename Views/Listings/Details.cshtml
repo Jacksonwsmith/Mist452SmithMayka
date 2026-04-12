@@ -1,0 +1,28 @@
+@model Mist452SmithMayka.Models.Listing
+
+@{
+    ViewData["Title"] = "Listing Details";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">@Model.Title</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <p><strong>Description:</strong></p>
+            <p>@Model.Description</p>
+        </div>
+
+        <div class="col-md-6">
+            <ul class="list-group">
+                <li class="list-group-item"><strong>Price:</strong> $@Model.Price</li>
+                <li class="list-group-item"><strong>Seller:</strong> @Model.Seller?.UserName</li>
+                <li class="list-group-item"><strong>Date Posted:</strong> @Model.CreatedDate.ToShortDateString()</li>
+            </ul>
+
+            <div class="mt-3">
+                <a asp-action="Index" class="btn btn-secondary">Back to Listings</a>
+            </div>
+        </div>
+    </div>
+</div>

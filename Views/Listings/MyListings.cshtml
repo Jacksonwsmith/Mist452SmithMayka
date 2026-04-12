@@ -1,0 +1,44 @@
+@model IEnumerable<Mist452SmithMayka.Models.Listing>
+
+@{
+    ViewData["Title"] = "My Listings";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">My Listings</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No Listings Found
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Price</th>
+                    <th>Date Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Title</td>
+                        <td>$@item.Price</td>
+                        <td>@item.CreatedDate.ToShortDateString()</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.ListingId" class="btn btn-sm btn-primary">
+                                Details
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

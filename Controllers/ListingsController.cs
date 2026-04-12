@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Mist452SmithMayka.Data;
 using Mist452SmithMayka.Models;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Mist452SmithMayka.Controllers
 {
-    [Authorize]
     public class ListingsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -18,25 +20,44 @@ namespace Mist452SmithMayka.Controllers
             _userManager = userManager;
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var listings = await _context.Listings
+                .Include(l => l.Seller)
+                .OrderByDescending(l => l.CreatedDate)
+                .ToListAsync();
+
+            return View(listings);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Listing listing)
+        [Authorize]
+        public async Task<IActionResult> MyListings()
         {
-            if (ModelState.IsValid)
+            var userId = _userManager.GetUserId(User);
+
+            var myListings = await _context.Listings
+                .Include(l => l.Seller)
+                .Where(l => l.SellerId == userId)
+                .OrderByDescending(l => l.CreatedDate)
+                .ToListAsync();
+
+            return View(myListings);
+        }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
             {
-                listing.SellerId = _userManager.GetUserId(User);
-                listing.CreatedDate = DateTime.Now;
+                return NotFound();
+            }
 
-                _context.Listings.Add(listing);
-                await _context.SaveChangesAsync();
+            var listing = await _context.Listings
+                .Include(l => l.Seller)
+                .FirstOrDefaultAsync(l => l.ListingId == id);
 
-                TempData["SuccessMessage"] = "Listing created successfully.";
-                return RedirectToAction("Index", "Home");
+            if (listing == null)
+            {
+                return NotFound();
             }
 
             return View(listing);
