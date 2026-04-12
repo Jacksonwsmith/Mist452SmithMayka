@@ -20,7 +20,52 @@ namespace Mist452SmithMayka.Controllers
             _userManager = userManager;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
+        {
+            var listings = await _context.Listings
+                .Include(l => l.Seller)
+                .OrderByDescending(l => l.CreatedDate)
+                .ToListAsync();
+
+            return View(listings);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> MyListings()
+        {
+            var userId = _userManager.GetUserId(User);
+            var myListings = await _context.Listings
+                .Include(l => l.Seller)
+                .Where(l => l.SellerId == userId)
+                .OrderByDescending(l => l.CreatedDate)
+                .ToListAsync();
+
+            return View(myListings);
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var listing = await _context.Listings
+                .Include(l => l.Seller)
+                .FirstOrDefaultAsync(l => l.ListingId == id);
+
+            if (listing == null)
+            {
+                return NotFound();
+            }
+
+            return View(listing);
+        }
+
+        [Authorize]
+        public IActionResult Create()
         {
             var listings = await _context.Listings
                 .Include(l => l.Seller)
@@ -44,23 +89,24 @@ namespace Mist452SmithMayka.Controllers
             return View(myListings);
         }
 
-        public async Task<IActionResult> Details(int? id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> Create(Listing listing)
         {
-            if (id == null)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                return View(listing);
             }
 
-            var listing = await _context.Listings
-                .Include(l => l.Seller)
-                .FirstOrDefaultAsync(l => l.ListingId == id);
+            listing.SellerId = _userManager.GetUserId(User);
+            listing.CreatedDate = DateTime.Now;
 
-            if (listing == null)
-            {
-                return NotFound();
-            }
+            _context.Listings.Add(listing);
+            await _context.SaveChangesAsync();
 
-            return View(listing);
+            TempData["SuccessMessage"] = "Listing created successfully.";
+            return RedirectToAction(nameof(MyListings));
         }
     }
 }
