@@ -1,3 +1,5 @@
 bin/
 obj/
 app.db
+mist452-dev.db*
+README.local-before-jackson-checkout.md

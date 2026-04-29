@@ -21,13 +21,23 @@ namespace Mist452SmithMayka.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm)
         {
-            var listings = await _context.Listings
+            var listingsQuery = _context.Listings
                 .Include(l => l.Seller)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var normalizedSearchTerm = searchTerm.ToLower();
+                listingsQuery = listingsQuery.Where(l => l.Title.ToLower().Contains(normalizedSearchTerm));
+            }
+
+            var listings = await listingsQuery
                 .OrderByDescending(l => l.CreatedDate)
                 .ToListAsync();
 
+            ViewData["SearchTerm"] = searchTerm;
             return View(listings);
         }
 
@@ -67,40 +77,28 @@ namespace Mist452SmithMayka.Controllers
         [Authorize]
         public IActionResult Create()
         {
-            var listings = await _context.Listings
-                .Include(l => l.Seller)
-                .OrderByDescending(l => l.CreatedDate)
-                .ToListAsync();
-
-            return View(listings);
-        }
-
-        [Authorize]
-        public async Task<IActionResult> MyListings()
-        {
-            var userId = _userManager.GetUserId(User);
-
-            var myListings = await _context.Listings
-                .Include(l => l.Seller)
-                .Where(l => l.SellerId == userId)
-                .OrderByDescending(l => l.CreatedDate)
-                .ToListAsync();
-
-            return View(myListings);
+            return View(new Listing());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize]
-        public async Task<IActionResult> Create(Listing listing)
+        public async Task<IActionResult> Create([Bind("Title,Description,Price")] Listing listing)
         {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return Challenge();
+            }
+
+            listing.SellerId = userId;
+            listing.CreatedDate = DateTime.Now;
+            ModelState.Remove(nameof(Listing.SellerId));
+
             if (!ModelState.IsValid)
             {
                 return View(listing);
             }
-
-            listing.SellerId = _userManager.GetUserId(User);
-            listing.CreatedDate = DateTime.Now;
 
             _context.Listings.Add(listing);
             await _context.SaveChangesAsync();
