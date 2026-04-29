@@ -12,10 +12,22 @@ namespace Mist452SmithMayka
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession();
 
             var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connString));
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                if (builder.Environment.IsDevelopment())
+                {
+                    options.UseSqlite(connString);
+                }
+                else
+                {
+                    options.UseSqlServer(connString);
+                }
+            });
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
@@ -39,6 +51,7 @@ namespace Mist452SmithMayka
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
+            app.UseSession();
 
             app.UseAuthentication();
             app.UseAuthorization();

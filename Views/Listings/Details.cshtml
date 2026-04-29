@@ -21,6 +21,11 @@
             <div class="card-footer bg-white">
                 <a asp-action="Index" class="btn btn-outline-secondary">Back to Browse</a>
                 <a asp-action="MyListings" class="btn btn-primary">My Listings</a>
+                <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
+                    <input type="hidden" name="listingId" value="@Model.ListingId" />
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                    <button type="submit" class="btn btn-success">Add to Cart</button>
+                </form>
             </div>
         </div>
     </div>

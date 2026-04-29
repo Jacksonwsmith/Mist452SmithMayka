@@ -32,6 +32,7 @@ else
                 <th>Price</th>
                 <th>Seller</th>
                 <th>Date Created</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -43,6 +44,13 @@ else
                 <td>@item.Price.ToString("C")</td>
                 <td>@item.Seller?.UserName</td>
                 <td>@item.CreatedDate.ToShortDateString()</td>
+                <td>
+                    <form asp-controller="Cart" asp-action="Add" method="post">
+                        <input type="hidden" name="listingId" value="@item.ListingId" />
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                        <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+                    </form>
+                </td>
             </tr>
         }
         </tbody>
