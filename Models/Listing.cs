@@ -26,9 +26,18 @@ namespace Mist452SmithMayka.Models
 
         public DateTime CreatedDate { get; set; }
 
+        public bool IsSold { get; set; }
+
+        public DateTime? SoldDate { get; set; }
+
+        public string? BuyerId { get; set; }
+
         public string SellerId { get; set; }
 
         [ForeignKey("SellerId")]
         public ApplicationUser? Seller { get; set; }//navigational property
+
+        [ForeignKey("BuyerId")]
+        public ApplicationUser? Buyer { get; set; }
     }
 }

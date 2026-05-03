@@ -25,6 +25,7 @@ namespace Mist452SmithMayka.Controllers
         {
             var listingsQuery = _context.Listings
                 .Include(l => l.Seller)
+                .Where(l => !l.IsSold)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -64,6 +65,7 @@ namespace Mist452SmithMayka.Controllers
 
             var listing = await _context.Listings
                 .Include(l => l.Seller)
+                .Include(l => l.Buyer)
                 .FirstOrDefaultAsync(l => l.ListingId == id);
 
             if (listing == null)
