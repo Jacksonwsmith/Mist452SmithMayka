@@ -19,6 +19,11 @@ namespace Mist452SmithMayka
 
             var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+            if (string.IsNullOrWhiteSpace(connString))
+            {
+                throw new InvalidOperationException("DefaultConnection is not configured. Set ConnectionStrings__DefaultConnection in Azure App Settings.");
+            }
+
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 if (builder.Environment.IsDevelopment())
