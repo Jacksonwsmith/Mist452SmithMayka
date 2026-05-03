@@ -1,0 +1,33 @@
+@model Mist452SmithMayka.Models.PaymentInfoViewModel
+
+@{
+    ViewData["Title"] = "Payment Info";
+}
+
+<h1 class="mb-4">Payment Info</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        @if (Model.HasPaymentInfo)
+        {
+            <h5 class="card-title">Payment info is on file</h5>
+            <p class="card-text">Your account has payment information saved through Stripe.</p>
+        }
+        else
+        {
+            <h5 class="card-title">No payment info added</h5>
+            <p class="card-text">You can add payment information now or wait until later.</p>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.StripeCustomerId))
+        {
+            <p class="text-muted mb-3">Stripe customer: @Model.StripeCustomerId</p>
+        }
+
+        <form asp-action="AddPaymentInfo" method="post" class="d-inline">
+            <button type="submit" class="btn btn-primary">
+                @(Model.HasPaymentInfo ? "Update Payment Info" : "Add Payment Info")
+            </button>
+        </form>
+    </div>
+</div>

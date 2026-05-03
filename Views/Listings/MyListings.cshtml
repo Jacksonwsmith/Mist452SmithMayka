@@ -20,6 +20,10 @@ else
                 <div class="card h-100 shadow-sm">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title">@listing.Title</h5>
+                        @if (listing.IsSold)
+                        {
+                            <span class="badge bg-secondary mb-2">Sold</span>
+                        }
                         <p class="card-text mb-3">
                             @(listing.Description.Length > 120
                                 ? $"{listing.Description.Substring(0, 120)}..."

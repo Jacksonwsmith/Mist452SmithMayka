@@ -50,6 +50,8 @@ else
         </tfoot>
     </table>
 
-    <button type="button" class="btn btn-success" disabled>Checkout</button>
+    <form asp-controller="Cart" asp-action="Checkout" method="post" class="d-inline">
+        <button type="submit" class="btn btn-success">Checkout with Stripe</button>
+    </form>
     <a asp-controller="Listings" asp-action="Index" class="btn btn-outline-secondary">Continue Shopping</a>
 }
