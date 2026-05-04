@@ -218,6 +218,39 @@ namespace Mist452SmithMayka.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> Unlike(int id, string? returnUrl)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return Challenge();
+            }
+
+            var likedListing = await _context.LikedListings
+                .FirstOrDefaultAsync(ll => ll.UserId == userId && ll.ListingId == id);
+
+            if (likedListing == null)
+            {
+                TempData["ErrorMessage"] = "That listing was not in your liked listings.";
+            }
+            else
+            {
+                _context.LikedListings.Remove(likedListing);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Listing removed from your liked listings.";
+            }
+
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         [Authorize]
         public async Task<IActionResult> MyLikedListings()
         {

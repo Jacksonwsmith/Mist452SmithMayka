@@ -45,7 +45,10 @@
                 {
                     @if ((bool?)ViewData["AlreadyLiked"] == true)
                     {
-                        <button class="btn btn-secondary" disabled>&#9829; Already Liked</button>
+                        <form asp-action="Unlike" asp-route-id="@Model.ListingId" method="post" class="d-inline">
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                            <button type="submit" class="btn btn-danger">&#9829; Unlike</button>
+                        </form>
                     }
                     else
                     {
