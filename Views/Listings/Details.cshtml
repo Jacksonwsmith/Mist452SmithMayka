@@ -54,6 +54,10 @@
                         </form>
                     }
                 }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-outline-danger">&#9825; Sign in to Like</a>
+                }
             </div>
         </div>
     </div>
