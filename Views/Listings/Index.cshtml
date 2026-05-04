@@ -1,0 +1,62 @@
+@model IEnumerable<Mist452SmithMayka.Models.Listing>
+
+@{
+    ViewData["Title"] = "Browse Listings";
+    var searchTerm = ViewData["SearchTerm"] as string;
+}
+
+<h1 class="mb-4">Browse Listings</h1>
+
+<form asp-action="Index" method="get" class="row g-2 mb-4">
+    <div class="col-md-8">
+        <label for="searchTerm" class="visually-hidden">Search listings</label>
+        <input id="searchTerm" name="searchTerm" value="@searchTerm" class="form-control" placeholder="Search by listing title" />
+    </div>
+    <div class="col-md-auto">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(searchTerm))
+    {
+        <div class="col-md-auto">
+            <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    }
+</form>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No listings found.</div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var listing in Model)
+        {
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@listing.Title</h5>
+                        <p class="card-text text-muted mb-2">
+                            Seller: @(listing.Seller?.UserName ?? "Unknown Seller")
+                        </p>
+                        <p class="card-text mb-3">
+                            @(listing.Description.Length > 120
+                                ? $"{listing.Description.Substring(0, 120)}..."
+                                : listing.Description)
+                        </p>
+                        <p class="card-text fw-bold text-success mt-auto">@listing.Price.ToString("C")</p>
+                        <a asp-action="Details" asp-route-id="@listing.ListingId" class="btn btn-outline-primary mb-2">View Details</a>
+                        <form asp-controller="Cart" asp-action="Add" method="post">
+                            <input type="hidden" name="listingId" value="@listing.ListingId" />
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                            <button type="submit" class="btn btn-primary w-100">Add to Cart</button>
+                        </form>
+                    </div>
+                    <div class="card-footer text-muted">
+                        Posted @listing.CreatedDate.ToString("MMM dd, yyyy")
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

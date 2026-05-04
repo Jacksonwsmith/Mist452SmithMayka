@@ -1,0 +1,45 @@
+@model IEnumerable<Mist452SmithMayka.Models.Listing>
+
+@{
+    ViewData["Title"] = "My Liked Listings";
+}
+
+<h1 class="mb-4">My Liked Listings</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No Liked Listings Found</div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var listing in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">@listing.Title</h5>
+                        <p class="card-text text-muted small">@listing.Description</p>
+                        <p class="card-text">
+                            <strong class="text-success">@listing.Price.ToString("C")</strong>
+                        </p>
+                        <p class="card-text small">
+                            <strong>Seller:</strong> @(listing.Seller?.UserName ?? "Unknown")
+                        </p>
+                        @if (listing.IsSold)
+                        {
+                            <span class="badge bg-secondary">Sold</span>
+                        }
+                    </div>
+                    <div class="card-footer bg-white">
+                        <a asp-action="Details" asp-route-id="@listing.ListingId" class="btn btn-outline-primary btn-sm">View Details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to Browse</a>
+</div>

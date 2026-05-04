@@ -1,0 +1,57 @@
+@model IEnumerable<Mist452SmithMayka.Models.Listing>
+
+@{
+    ViewData["Title"] = "Manage Listings";
+}
+
+<h1 class="mb-4">Manage Listings</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No listings have been created yet.</div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Seller</th>
+                <th>Status</th>
+                <th>Price</th>
+                <th>Posted</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var listing in Model)
+            {
+                <tr>
+                    <td>@listing.Title</td>
+                    <td>@(listing.Seller?.UserName ?? "Unknown Seller")</td>
+                    <td>
+                        @if (listing.IsSold)
+                        {
+                            <span class="badge bg-secondary">Sold</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Available</span>
+                        }
+                    </td>
+                    <td>@listing.Price.ToString("C")</td>
+                    <td>@listing.CreatedDate.ToString("MMM dd, yyyy")</td>
+                    <td class="text-end">
+                        <a asp-controller="Listings" asp-action="Details" asp-route-id="@listing.ListingId" class="btn btn-sm btn-outline-primary">View</a>
+                        <form asp-action="DeleteListing" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@listing.ListingId" />
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="Index" class="btn btn-outline-secondary">Back to Admin Dashboard</a>

@@ -1,0 +1,20 @@
+@model Mist452SmithMayka.Models.Listing
+
+@{
+    ViewData["Title"] = "Order Detail";
+}
+
+<h1 class="mb-4">Order Detail</h1>
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">@Model.Title</h4>
+        <p class="text-muted mb-3">@Model.Description</p>
+
+        <p><strong>Price:</strong> @Model.Price.ToString("C")</p>
+        <p><strong>Seller:</strong> @Model.Seller?.UserName</p>
+        <p><strong>Date Purchased:</strong> @Model.SoldDate?.ToString("MMMM dd, yyyy")</p>
+    </div>
+</div>
+
+<a asp-action="Details" class="btn btn-outline-secondary mt-3">Back to Order History</a>

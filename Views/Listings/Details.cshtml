@@ -1,0 +1,60 @@
+@model Mist452SmithMayka.Models.Listing
+
+@{
+    ViewData["Title"] = "Listing Details";
+}
+
+<h1 class="mb-4">Listing Details</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title mb-3">@Model.Title</h3>
+                @if (Model.IsSold)
+                {
+                    <div class="alert alert-secondary">This listing has been sold.</div>
+                }
+                <p class="mb-2"><strong>Seller:</strong> @(Model.Seller?.UserName ?? "Unknown Seller")</p>
+                @if (Model.IsSold && Model.Buyer != null)
+                {
+                    <p class="mb-2"><strong>Buyer:</strong> @Model.Buyer.UserName</p>
+                }
+                <p class="mb-2"><strong>Price:</strong> <span class="text-success fw-bold">@Model.Price.ToString("C")</span></p>
+                <p class="mb-2"><strong>Posted:</strong> @Model.CreatedDate.ToString("MMMM dd, yyyy")</p>
+                @if (Model.SoldDate != null)
+                {
+                    <p class="mb-2"><strong>Sold:</strong> @Model.SoldDate.Value.ToString("MMMM dd, yyyy")</p>
+                }
+                <hr />
+                <h5>Description</h5>
+                <p>@Model.Description</p>
+            </div>
+            <div class="card-footer bg-white">
+                <a asp-action="Index" class="btn btn-outline-secondary">Back to Browse</a>
+                <a asp-action="MyListings" class="btn btn-primary">My Listings</a>
+                @if (!Model.IsSold)
+                {
+                    <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
+                        <input type="hidden" name="listingId" value="@Model.ListingId" />
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                        <button type="submit" class="btn btn-success">Add to Cart</button>
+                    </form>
+                }
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    @if ((bool?)ViewData["AlreadyLiked"] == true)
+                    {
+                        <button class="btn btn-secondary" disabled>&#9829; Already Liked</button>
+                    }
+                    else
+                    {
+                        <form asp-action="Like" asp-route-id="@Model.ListingId" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger">&#9825; Like</button>
+                        </form>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,71 @@
+@model IEnumerable<Mist452SmithMayka.Models.Listing>
+
+@{
+    ViewData["Title"] = "Cart";
+    var total = ViewBag.Total as decimal? ?? 0m;
+    var soldItems = ViewBag.SoldItems as List<Mist452SmithMayka.Models.Listing> ?? new();
+}
+
+<h1 class="mb-4">Cart</h1>
+
+@if (soldItems.Any())
+{
+    <div class="alert alert-warning">
+        <strong>Some items were removed from your cart because they sold while you were shopping:</strong>
+        <ul class="mb-0 mt-1">
+            @foreach (var item in soldItems)
+            {
+                <li>@item.Title</li>
+            }
+        </ul>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Your cart is empty.</div>
+    <a asp-controller="Listings" asp-action="Index" class="btn btn-primary">Browse Listings</a>
+}
+else
+{
+    <table class="table table-bordered table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Seller</th>
+                <th>Price</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a asp-controller="Listings" asp-action="Details" asp-route-id="@item.ListingId">@item.Title</a>
+                    </td>
+                    <td>@(item.Seller?.UserName ?? "Unknown Seller")</td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td class="text-end">
+                        <form asp-controller="Cart" asp-action="Remove" method="post">
+                            <input type="hidden" name="listingId" value="@item.ListingId" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="2">Total</th>
+                <th>@total.ToString("C")</th>
+                <th></th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <form asp-controller="Cart" asp-action="Checkout" method="post" class="d-inline">
+        <button type="submit" class="btn btn-success">Checkout with Stripe</button>
+    </form>
+    <a asp-controller="Listings" asp-action="Index" class="btn btn-outline-secondary">Continue Shopping</a>
+}

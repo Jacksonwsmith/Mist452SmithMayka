@@ -1,0 +1,21 @@
+@model Mist452SmithMayka.Models.FakeEmailViewModel
+
+@{
+    ViewData["Title"] = "Fake Reset Email";
+}
+
+<h1>Fake Password Reset Email</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <p><strong>To:</strong> @Model.Email</p>
+        <p><strong>Subject:</strong> Reset your password</p>
+        <hr />
+        <p>Use the link below to reset your password.</p>
+        <a href="@Model.ResetLink" class="btn btn-primary">Reset Password</a>
+        <div class="mt-3">
+            <label class="form-label">Reset Link</label>
+            <input value="@Model.ResetLink" class="form-control" readonly />
+        </div>
+    </div>
+</div>
