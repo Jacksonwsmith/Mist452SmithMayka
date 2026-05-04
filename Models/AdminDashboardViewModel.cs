@@ -5,5 +5,7 @@ namespace Mist452SmithMayka.Models
         public int UserCount { get; set; }
 
         public int ListingCount { get; set; }
+
+        public int SoldListingCount { get; set; }
     }
 }

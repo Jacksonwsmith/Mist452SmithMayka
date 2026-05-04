@@ -24,7 +24,8 @@ namespace Mist452SmithMayka.Controllers
             var viewModel = new AdminDashboardViewModel
             {
                 UserCount = await _userManager.Users.CountAsync(),
-                ListingCount = await _context.Listings.CountAsync()
+                ListingCount = await _context.Listings.CountAsync(),
+                SoldListingCount = await _context.Listings.CountAsync(l => l.IsSold)
             };
 
             return View(viewModel);
@@ -62,6 +63,18 @@ namespace Mist452SmithMayka.Controllers
                 .ToListAsync();
 
             return View(listings);
+        }
+
+        public async Task<IActionResult> Sold()
+        {
+            var soldListings = await _context.Listings
+                .Include(l => l.Seller)
+                .Include(l => l.Buyer)
+                .Where(l => l.IsSold)
+                .OrderByDescending(l => l.SoldDate)
+                .ToListAsync();
+
+            return View(soldListings);
         }
 
         [HttpPost]

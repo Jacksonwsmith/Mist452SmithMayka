@@ -7,7 +7,7 @@
 <h1 class="mb-4">Admin Dashboard</h1>
 
 <div class="row g-4 mb-4">
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">Users</h5>
@@ -16,12 +16,21 @@
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">Listings</h5>
                 <p class="display-6">@Model.ListingCount</p>
                 <a asp-action="Listings" class="btn btn-primary">Manage Listings</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Sold</h5>
+                <p class="display-6">@Model.SoldListingCount</p>
+                <a asp-action="Sold" class="btn btn-primary">View Sold Items</a>
             </div>
         </div>
     </div>

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Mist452SmithMayka.Data;
 using Mist452SmithMayka.Models;
@@ -78,6 +79,7 @@ namespace Mist452SmithMayka.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout()
         {
@@ -111,10 +113,16 @@ namespace Mist452SmithMayka.Controllers
             return Redirect(checkoutUrl);
         }
 
+        [Authorize]
         public async Task<IActionResult> CheckoutSuccess()
         {
             var cartIds = GetCartIds();
             var buyerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (buyerId == null)
+            {
+                return Challenge();
+            }
+
             var listings = await _context.Listings
                 .Where(l => cartIds.Contains(l.ListingId) && !l.IsSold)
                 .ToListAsync();

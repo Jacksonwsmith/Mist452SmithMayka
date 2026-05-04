@@ -1,0 +1,64 @@
+@model IEnumerable<Mist452SmithMayka.Models.Listing>
+
+@{
+    ViewData["Title"] = "Sold Items";
+}
+
+<h1 class="mb-4">Sold Items</h1>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No items have been sold yet.</div>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Seller</th>
+                <th>Buyer</th>
+                <th>Buyer Contact</th>
+                <th>Buyer Address</th>
+                <th>Price</th>
+                <th>Sold</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var listing in Model)
+            {
+                <tr>
+                    <td>@listing.Title</td>
+                    <td>@(listing.Seller?.UserName ?? "Unknown Seller")</td>
+                    <td>@(listing.Buyer?.Name ?? listing.Buyer?.UserName ?? "Unknown Buyer")</td>
+                    <td>
+                        <div>@(listing.Buyer?.Email ?? "No email")</div>
+                        @if (!string.IsNullOrWhiteSpace(listing.Buyer?.PhoneNumber))
+                        {
+                            <div>@listing.Buyer.PhoneNumber</div>
+                        }
+                    </td>
+                    <td>
+                        @if (listing.Buyer == null)
+                        {
+                            <span>Unknown</span>
+                        }
+                        else
+                        {
+                            <div>@listing.Buyer.StreetAddress</div>
+                            <div>@listing.Buyer.City @listing.Buyer.State @listing.Buyer.PostalCode</div>
+                        }
+                    </td>
+                    <td>@listing.Price.ToString("C")</td>
+                    <td>@(listing.SoldDate?.ToString("MMM dd, yyyy") ?? "Unknown")</td>
+                    <td class="text-end">
+                        <a asp-controller="Listings" asp-action="Details" asp-route-id="@listing.ListingId" class="btn btn-sm btn-outline-primary">View</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="Index" class="btn btn-outline-secondary">Back to Admin Dashboard</a>
