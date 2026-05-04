@@ -41,6 +41,19 @@
                         <button type="submit" class="btn btn-success">Add to Cart</button>
                     </form>
                 }
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    @if ((bool?)ViewData["AlreadyLiked"] == true)
+                    {
+                        <button class="btn btn-secondary" disabled>&#9829; Already Liked</button>
+                    }
+                    else
+                    {
+                        <form asp-action="Like" asp-route-id="@Model.ListingId" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger">&#9825; Like</button>
+                        </form>
+                    }
+                }
             </div>
         </div>
     </div>

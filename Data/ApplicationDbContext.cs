@@ -12,5 +12,7 @@ namespace Mist452SmithMayka.Data
         }
 
         public DbSet<Listing> Listings { get; set; }
+
+        public DbSet<LikedListing> LikedListings { get; set; }
     }
 }

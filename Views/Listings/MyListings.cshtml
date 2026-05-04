@@ -4,12 +4,14 @@
     ViewData["Title"] = "My Listings";
 }
 
-<h1 class="mb-4">My Listings</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">My Listings</h1>
+    <a asp-action="Create" class="btn btn-primary">+ Create Listing</a>
+</div>
 
 @if (!Model.Any())
 {
     <div class="alert alert-info">You have not created any listings yet.</div>
-    <a asp-action="Create" class="btn btn-primary">Create Your First Listing</a>
 }
 else
 {
@@ -31,6 +33,15 @@ else
                         </p>
                         <p class="card-text fw-bold text-success mt-auto">@listing.Price.ToString("C")</p>
                         <a asp-action="Details" asp-route-id="@listing.ListingId" class="btn btn-outline-primary">View Details</a>
+                        @if (!listing.IsSold)
+                        {
+                            <a asp-action="EditListing" asp-route-id="@listing.ListingId" class="btn btn-outline-secondary mt-2">Edit Listing</a>
+                            <form asp-action="DeleteListing" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this listing?');">
+                                <input type="hidden" name="id" value="@listing.ListingId" />
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-danger mt-2">Delete Listing</button>
+                            </form>
+                        }
                     </div>
                     <div class="card-footer text-muted">
                         Posted @listing.CreatedDate.ToString("MMM dd, yyyy")

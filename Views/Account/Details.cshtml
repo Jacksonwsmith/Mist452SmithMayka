@@ -1,0 +1,54 @@
+@model IEnumerable<Mist452SmithMayka.Models.Listing>
+
+@{
+    ViewData["Title"] = "Account Details";
+}
+
+<h1 class="mb-4">Account Details</h1>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Profile</h5>
+        <p class="mb-1"><strong>Name:</strong> @ViewData["Name"]</p>
+        <p class="mb-1"><strong>Username:</strong> @ViewData["UserName"]</p>
+        <p class="mb-1"><strong>Email:</strong> @ViewData["Email"]</p>
+        <p class="mb-1"><strong>Location:</strong> @ViewData["City"]@(ViewData["City"] != null && ViewData["State"] != null ? ", " : "")@ViewData["State"]</p>
+        <a asp-action="EditAccount" class="btn btn-outline-secondary btn-sm mt-2">Edit Account</a>
+    </div>
+</div>
+
+<h3 class="mb-3">Order History</h3>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">You have not purchased any items yet.</div>
+    <a asp-controller="Listings" asp-action="Index" class="btn btn-primary">Browse Listings</a>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Seller</th>
+                <th>Price</th>
+                <th>Date Purchased</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.Title</td>
+                    <td>@order.Seller?.UserName</td>
+                    <td>@order.Price.ToString("C")</td>
+                    <td>@order.SoldDate?.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        <a asp-action="OrderDetail" asp-route-id="@order.ListingId" class="btn btn-outline-primary btn-sm">View Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

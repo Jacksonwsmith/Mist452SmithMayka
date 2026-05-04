@@ -73,6 +73,13 @@ namespace Mist452SmithMayka.Controllers
                 return NotFound();
             }
 
+            var userId = _userManager.GetUserId(User);
+            if (userId != null)
+            {
+                ViewData["AlreadyLiked"] = await _context.LikedListings
+                    .AnyAsync(ll => ll.UserId == userId && ll.ListingId == id);
+            }
+
             return View(listing);
         }
 
@@ -107,6 +114,129 @@ namespace Mist452SmithMayka.Controllers
 
             TempData["SuccessMessage"] = "Listing created successfully.";
             return RedirectToAction(nameof(MyListings));
+        }
+
+        [Authorize]
+        public async Task<IActionResult> EditListing(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var listing = await _context.Listings.FindAsync(id);
+            if (listing == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            if (listing.SellerId != userId) return Forbid();
+
+            return View(listing);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> EditListing(int id, [Bind("ListingId,Title,Description,Price")] Listing listing)
+        {
+            if (id != listing.ListingId) return NotFound();
+
+            var existing = await _context.Listings.FindAsync(id);
+            if (existing == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            if (existing.SellerId != userId) return Forbid();
+
+            ModelState.Remove(nameof(Listing.SellerId));
+
+            if (!ModelState.IsValid) return View(listing);
+
+            existing.Title = listing.Title;
+            existing.Description = listing.Description;
+            existing.Price = listing.Price;
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Listing updated successfully.";
+            return RedirectToAction(nameof(MyListings));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> DeleteListing(int id)
+        {
+            var listing = await _context.Listings.FindAsync(id);
+            if (listing == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            if (listing.SellerId != userId) return Forbid();
+
+            var likedListings = await _context.LikedListings
+                .Where(ll => ll.ListingId == id)
+                .ToListAsync();
+            _context.LikedListings.RemoveRange(likedListings);
+
+            _context.Listings.Remove(listing);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Listing deleted successfully.";
+            return RedirectToAction(nameof(MyListings));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> Like(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return Challenge();
+            }
+
+            var listing = await _context.Listings.FindAsync(id);
+            if (listing == null)
+            {
+                return NotFound();
+            }
+
+            var alreadyLiked = await _context.LikedListings
+                .AnyAsync(ll => ll.UserId == userId && ll.ListingId == id);
+
+            if (alreadyLiked)
+            {
+                TempData["ErrorMessage"] = "You have already liked this listing.";
+            }
+            else
+            {
+                _context.LikedListings.Add(new Mist452SmithMayka.Models.LikedListing
+                {
+                    UserId = userId,
+                    ListingId = id
+                });
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Listing added to your liked listings!";
+            }
+
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [Authorize]
+        public async Task<IActionResult> MyLikedListings()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (userId == null)
+            {
+                return Challenge();
+            }
+
+            var likedListings = await _context.LikedListings
+                .Include(ll => ll.Listing)
+                    .ThenInclude(l => l!.Seller)
+                .Where(ll => ll.UserId == userId)
+                .OrderByDescending(ll => ll.LikedListingId)
+                .Select(ll => ll.Listing)
+                .Where(l => l != null)
+                .ToListAsync();
+
+            return View(likedListings);
         }
     }
 }

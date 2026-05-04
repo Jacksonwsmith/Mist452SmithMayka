@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Mist452SmithMayka.Data;
 using Mist452SmithMayka.Models;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -14,17 +16,20 @@ namespace Mist452SmithMayka.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ApplicationDbContext _context;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IConfiguration configuration,
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
+            _context = context;
         }
 
         [AllowAnonymous]
@@ -292,12 +297,115 @@ namespace Mist452SmithMayka.Controllers
         }
 
         [Authorize]
+        public async Task<IActionResult> EditAccount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return Challenge();
+            }
+
+            var model = new EditAccountViewModel
+            {
+                Name = user.Name,
+                StreetAddress = user.StreetAddress,
+                City = user.City,
+                State = user.State,
+                PostalCode = user.PostalCode
+            };
+
+            ViewData["UserName"] = user.UserName;
+            ViewData["Email"] = user.Email;
+
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAccount(EditAccountViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return Challenge();
+            }
+
+            ViewData["UserName"] = user.UserName;
+            ViewData["Email"] = user.Email;
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            user.Name = model.Name;
+            user.StreetAddress = model.StreetAddress;
+            user.City = model.City;
+            user.State = model.State;
+            user.PostalCode = model.PostalCode;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Account updated successfully.";
+                return RedirectToAction(nameof(EditAccount));
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View(model);
+        }
+
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Details()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var orders = await _context.Listings
+                .Include(l => l.Seller)
+                .Where(l => l.BuyerId == user.Id)
+                .OrderByDescending(l => l.SoldDate)
+                .ToListAsync();
+
+            ViewData["UserName"] = user.UserName;
+            ViewData["Email"] = user.Email;
+            ViewData["Name"] = user.Name;
+            ViewData["City"] = user.City;
+            ViewData["State"] = user.State;
+
+            return View(orders);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> OrderDetail(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            var listing = await _context.Listings
+                .Include(l => l.Seller)
+                .FirstOrDefaultAsync(l => l.ListingId == id && l.BuyerId == userId);
+
+            if (listing == null) return NotFound();
+
+            return View(listing);
         }
 
         private async Task AddOrUpdateClaimAsync(ApplicationUser user, string claimType, string claimValue)

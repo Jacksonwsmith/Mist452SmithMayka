@@ -83,10 +83,19 @@ namespace Mist452SmithMayka.Controllers
                 return NotFound();
             }
 
+            var userListingIds = await _context.Listings
+                .Where(l => l.SellerId == id)
+                .Select(l => l.ListingId)
+                .ToListAsync();
+
+            var orphanedLikes = await _context.LikedListings
+                .Where(ll => userListingIds.Contains(ll.ListingId))
+                .ToListAsync();
+            _context.LikedListings.RemoveRange(orphanedLikes);
+
             var userListings = await _context.Listings
                 .Where(l => l.SellerId == id)
                 .ToListAsync();
-
             _context.Listings.RemoveRange(userListings);
             await _context.SaveChangesAsync();
 
@@ -116,6 +125,11 @@ namespace Mist452SmithMayka.Controllers
             {
                 return NotFound();
             }
+
+            var likedListings = await _context.LikedListings
+                .Where(ll => ll.ListingId == id)
+                .ToListAsync();
+            _context.LikedListings.RemoveRange(likedListings);
 
             _context.Listings.Remove(listing);
             await _context.SaveChangesAsync();

@@ -47,6 +47,7 @@ namespace Mist452SmithMayka
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 dbContext.Database.EnsureCreated();
                 EnsureListingSoldColumnsAsync(dbContext).GetAwaiter().GetResult();
+                EnsureLikedListingsTableAsync(dbContext).GetAwaiter().GetResult();
 
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
@@ -155,6 +156,31 @@ namespace Mist452SmithMayka
                     "IF COL_LENGTH('Listings', 'SoldDate') IS NULL ALTER TABLE Listings ADD SoldDate datetime2 NULL;");
                 await dbContext.Database.ExecuteSqlRawAsync(
                     "IF COL_LENGTH('Listings', 'BuyerId') IS NULL ALTER TABLE Listings ADD BuyerId nvarchar(450) NULL;");
+            }
+        }
+
+        private static async Task EnsureLikedListingsTableAsync(ApplicationDbContext dbContext)
+        {
+            if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+            {
+                await dbContext.Database.ExecuteSqlRawAsync(@"
+                    CREATE TABLE IF NOT EXISTS LikedListings (
+                        LikedListingId INTEGER PRIMARY KEY AUTOINCREMENT,
+                        UserId TEXT NOT NULL,
+                        ListingId INTEGER NOT NULL
+                    );");
+                return;
+            }
+
+            if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
+            {
+                await dbContext.Database.ExecuteSqlRawAsync(@"
+                    IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='LikedListings' AND xtype='U')
+                    CREATE TABLE LikedListings (
+                        LikedListingId INT IDENTITY(1,1) PRIMARY KEY,
+                        UserId NVARCHAR(450) NOT NULL,
+                        ListingId INT NOT NULL
+                    );");
             }
         }
 

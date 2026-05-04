@@ -25,14 +25,18 @@ namespace Mist452SmithMayka.Controllers
         public async Task<IActionResult> Index()
         {
             var cartIds = GetCartIds();
-            var listings = await _context.Listings
+            var allCartListings = await _context.Listings
                 .Include(l => l.Seller)
-                .Where(l => cartIds.Contains(l.ListingId) && !l.IsSold)
+                .Where(l => cartIds.Contains(l.ListingId))
                 .ToListAsync();
 
-            SaveCartIds(listings.Select(l => l.ListingId).ToList());
-            ViewBag.Total = listings.Sum(l => l.Price);
-            return View(listings);
+            var available = allCartListings.Where(l => !l.IsSold).ToList();
+            var soldWhileInCart = allCartListings.Where(l => l.IsSold).ToList();
+
+            SaveCartIds(available.Select(l => l.ListingId).ToList());
+            ViewBag.Total = available.Sum(l => l.Price);
+            ViewBag.SoldItems = soldWhileInCart;
+            return View(available);
         }
 
         [HttpPost]
@@ -124,8 +128,7 @@ namespace Mist452SmithMayka.Controllers
 
             await _context.SaveChangesAsync();
             HttpContext.Session.Remove(CartSessionKey);
-            TempData["SuccessMessage"] = "Payment completed successfully.";
-            return RedirectToAction(nameof(Index));
+            return View("OrderConfirmation", listings);
         }
 
         public IActionResult CheckoutCancel()

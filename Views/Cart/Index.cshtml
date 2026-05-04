@@ -3,9 +3,23 @@
 @{
     ViewData["Title"] = "Cart";
     var total = ViewBag.Total as decimal? ?? 0m;
+    var soldItems = ViewBag.SoldItems as List<Mist452SmithMayka.Models.Listing> ?? new();
 }
 
 <h1 class="mb-4">Cart</h1>
+
+@if (soldItems.Any())
+{
+    <div class="alert alert-warning">
+        <strong>Some items were removed from your cart because they sold while you were shopping:</strong>
+        <ul class="mb-0 mt-1">
+            @foreach (var item in soldItems)
+            {
+                <li>@item.Title</li>
+            }
+        </ul>
+    </div>
+}
 
 @if (!Model.Any())
 {
